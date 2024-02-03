@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <title>Lecture-meter</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Lecture-meter<br></h1><br>
+<h3 id="currentScore">Current score: 50</h3><br>
+<img id="graphImage" src="graph.png"><br>
+<input type="range" id="slider"> <br>
+<span id="sliderValue">50</span> <br>
+
+
+<button type="button" class="btn btn-link" id="submitButton">Submit</button>
+
+<script>
+    var slider = document.getElementById("slider");
+    var sliderValue = document.getElementById("sliderValue");
+    var submitButton = document.getElementById("submitButton");
+    var currentScore = document.getElementById("currentScore");
+    var graphImage = document.getElementById("graphImage");
+
+    sliderValue.innerHTML = slider.value;
+
+    slider.oninput = function() {
+        sliderValue.innerHTML = this.value;
+    }
+
+    function fetchCurrentScoreAndUpdateGraph() {
+        // Example of fetching the current score from the server
+        // You would need an endpoint that returns the current score, e.g., /current-score
+        fetch('/current-score')
+            .then(response => response.json())
+            .then(data => {
+                currentScore.innerHTML = 'Current score: ' + Math.round(data.score);
+                // Update graph image with cache busting
+                graphImage.src = 'graph.png?' + new Date().getTime();
+            })
+            .catch(error => console.error('Error fetching current score:', error));
+    }
+
+    // Update current score and graph image every second
+    setInterval(fetchCurrentScoreAndUpdateGraph, 1000);
+
+    submitButton.addEventListener("click", function() {
+        var valueToSend = slider.value;
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/vote", true);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+        var data = JSON.stringify({ "value": valueToSend });
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                // Optionally handle response, e.g., updating UI to show vote was successful
+            } else {
+                alert("Error: " + xhr.status);
+            }
+        };
+
+        xhr.send(data);
+    });
+</script>
+
+</body>
+</html>
